@@ -1,0 +1,19 @@
+<objects>
+<!-- ('', 'zport', 'dmd', 'Devices', 'Datacenter', 'Raritan') -->
+<object id="/zport/dmd/Devices/Datacenter/Raritan" module="Products.ZenModel.DeviceClass" class="DeviceClass">
+<property visible="True" type="string" id="zPythonClass">
+ZenPacks.community.Raritan.RaritanDevice
+</property>
+<property visible="True" type="boolean" id="zSnmpMonitorIgnore">
+False
+</property>
+<property visible="True" type="lines" id="zCollectorPlugins">
+['community.snmp.RaritanDevice', 'community.snmp.RaritanDeviceEnv', 'zenoss.snmp.NewDeviceMap', 'zenoss.snmp.DeviceMap', 'zenoss.snmp.SnmpV3EngineIdMap']
+</property>
+<property visible="True" type="lines" id="zDeviceTemplates">
+['Device']
+</property>
+<tomanycont id="rrdTemplates">
+</tomanycont>
+</object>
+</objects>

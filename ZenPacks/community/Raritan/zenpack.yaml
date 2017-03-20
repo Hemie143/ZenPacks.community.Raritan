@@ -1,0 +1,138 @@
+name: ZenPacks.community.Raritan
+
+classes:
+  RaritanDevice:
+    base: [zenpacklib.Device]
+    label: Raritan Device
+    properties:
+      model:
+        type: string
+        label: Model
+
+  # properties to convert to int
+  RaritanTemperatureSensor:
+    base: [zenpacklib.Component]
+    label: Temperature Sensor
+    monitoring_templates: [RaritanTemperatureSensor]
+    properties:
+      serial: 
+        label: Serial Number
+      sensor_type:
+        grid_display: False
+      sensor_units: 
+        label: Units
+        grid_display: False
+      sensor_digits:
+        grid_display: False
+      port:
+        label: Port
+
+  RaritanHumiditySensor:
+    base: [zenpacklib.Component]
+    label: Humidity Sensor
+    monitoring_templates: [RaritanHumiditySensor]
+    properties:
+      serial:
+        label: Serial Number
+      sensor_type:
+        grid_display: False
+      sensor_units:
+        label: Units
+        grid_display: False
+      sensor_digits:
+        grid_display: False
+      port:
+        label: Port
+
+  RaritanInlet:
+    base: [zenpacklib.Component]
+    label: Inlet
+    properties:
+      pdu_id:
+        type: int
+      inlet_number:
+        type: int
+
+  RaritanOutlet:
+    base: [zenpacklib.Component]
+    label: Outlet
+
+  RaritanOCP:
+    base: [zenpacklib.Component]
+    label: Overcurrent Protector
+
+device_classes:
+  /Datacenter/Raritan:
+    zProperties:
+      zPythonClass: ZenPacks.community.Raritan.RaritanDevice
+      zSnmpMonitorIgnore: false
+      zCollectorPlugins:
+        - community.snmp.RaritanDevice
+        - community.snmp.RaritanDeviceEnv
+        - zenoss.snmp.NewDeviceMap
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.SnmpV3EngineIdMap
+        - zenoss.snmp.InterfaceMap
+      zDeviceTemplates:
+        - Device
+
+    templates: # To replace with one single template for all Env sensors ? 
+      RaritanTemperatureSensor:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanTemperatureSensor
+        
+        datasources:
+          TempSensor:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanTempSensor
+
+            datapoints:
+              temperature:
+                rrdtype: GAUGE
+        graphs:
+          Temperature:
+            height: 100
+            width: 1000
+            units: "\xB0C"
+            graphpoints:
+              temperature:
+                dpName: TempSensor_temperature
+
+      RaritanHumiditySensor:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanHumiditySensor
+
+        datasources:
+          HumidSensor:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanHumidSensor
+
+            datapoints:
+              humidity:
+                rrdtype: GAUGE
+        graphs:
+          Humidity:
+            height: 100
+            width: 1000
+            units: '%'
+            graphpoints:
+              humidity:
+                dpName: HumidSensor_humidity
+
+      RaritanInlet:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanInlet
+
+        datasources:
+          Inlet:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanInlet
+
+
+  
+
+class_relationships:
+  - RaritanDevice 1:MC RaritanTemperatureSensor
+  - RaritanDevice 1:MC RaritanHumiditySensor
+  - RaritanDevice 1:MC RaritanInlet
+  - RaritanDevice 1:MC RaritanOutlet
+  - RaritanDevice 1:MC RaritanOCP
+
+
