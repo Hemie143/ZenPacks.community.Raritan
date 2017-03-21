@@ -47,10 +47,43 @@ classes:
   RaritanInlet:
     base: [zenpacklib.Component]
     label: Inlet
+    monitoring_templates: [RaritanInlet]
     properties:
       pdu_id:
         type: int
       inlet_number:
+        type: int
+      activeEnergy_digits:
+        type: int
+      activeEnergy_units:
+        type: int
+      activePower_digits:
+        type: int
+      activePower_units:
+        type: int
+      apparentPower_digits:
+        type: int
+      apparentPower_units:
+        type: int
+      frequency_digits:
+        type: int
+      frequency_units:
+        type: int
+      powerFactor_digits:
+        type: int
+      powerFactor_units:
+        type: int
+      rmsCurrent_digits:
+        type: int
+      rmsCurrent_units:
+        type: int
+      rmsVoltage_digits:
+        type: int
+      rmsVoltage_units:
+        type: int
+      unbalancedCurrent_digits:
+        type: int
+      unbalancedCurrent_units:
         type: int
 
   RaritanOutlet:
@@ -69,6 +102,7 @@ device_classes:
       zCollectorPlugins:
         - community.snmp.RaritanDevice
         - community.snmp.RaritanDeviceEnv
+        - community.snmp.RaritanInlet
         - zenoss.snmp.NewDeviceMap
         - zenoss.snmp.DeviceMap
         - zenoss.snmp.SnmpV3EngineIdMap
@@ -83,7 +117,7 @@ device_classes:
         datasources:
           TempSensor:
             type: Python
-            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanTempSensor
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanEnvSensor.SnmpRaritanTempSensor
 
             datapoints:
               temperature:
@@ -103,7 +137,7 @@ device_classes:
         datasources:
           HumidSensor:
             type: Python
-            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanHumidSensor
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanEnvSensor.SnmpRaritanHumidSensor
 
             datapoints:
               humidity:
@@ -123,10 +157,13 @@ device_classes:
         datasources:
           Inlet:
             type: Python
-            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanInlet
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanPDU.SnmpRaritanInlet
 
-
-  
+            datapoints:
+              active_energy:
+                rrdtype: GAUGE
+              rms_current:
+                rrdtype: GAUGE
 
 class_relationships:
   - RaritanDevice 1:MC RaritanTemperatureSensor
