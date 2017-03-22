@@ -158,19 +158,28 @@ classes:
     properties:
       status:
         type: string
+        grid_display: False
       ocp_type:
         type: string
+        grid_display: False
       lines:
         type: string
+        grid_display: False
       protected_outlets:
         type: string
+        grid_display: False
       rmsCurrent_digits:
         type: int
         grid_display: False
       rmsCurrent_units:
         type: int
         grid_display: False
-
+      trip_digits:
+        type: int
+        grid_display: False
+      trip_units:
+        type: int
+        grid_display: False
 
 device_classes:
   /Datacenter/Raritan:
@@ -182,6 +191,7 @@ device_classes:
         - community.snmp.RaritanDeviceEnv
         - community.snmp.RaritanInlet
         - community.snmp.RaritanOutlet
+        - community.snmp.RaritanOCP
         - zenoss.snmp.NewDeviceMap
         - zenoss.snmp.DeviceMap
         - zenoss.snmp.SnmpV3EngineIdMap
