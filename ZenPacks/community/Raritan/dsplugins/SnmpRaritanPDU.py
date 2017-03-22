@@ -15,7 +15,6 @@ measurementsOutletSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.4.3.1.2'
 measurementsOutletSensorState       = '1.3.6.1.4.1.13742.6.5.4.3.1.3'
 measurementsOutletSensorValue       = '1.3.6.1.4.1.13742.6.5.4.3.1.4'
 
-
 def getSnmpV3Args(ds0):
     snmpv3Args = []
     if '3' in ds0.zSnmpVer:
@@ -66,7 +65,7 @@ def getTableStuff(snmp_proxy, OIDstrings):
     return d
 
    
-class SnmpRaritanInlet(PythonDataSourcePlugin):
+class SnmpRaritanPDU(PythonDataSourcePlugin):
     # List of device attributes you might need to do collection.
     proxy_attributes = (
         'zSnmpVer',
@@ -82,17 +81,6 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
         'zSnmpTries',
         'zMaxOIDPerRequest',
         )
-
-    sensorType = {
-        'activeEnergy': [8, 'active_energy'],
-        'activePower': [5, 'active_power'],
-        'apparentPower': [6, 'apparent_power'],
-        'frequency': [23, 'frequency'],
-        'powerFactor': [7, 'power_factor'],
-        'rmsCurrent': [1, 'rms_current'],
-        'rmsVoltage': [4, 'rms_voltage'],
-        'unbalancedCurrent': [3, 'unbalanced_current'],
-        }
 
     sensorVars = ['units', 'digits']
 
@@ -152,31 +140,7 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
 
  
     def collect(self, config):
-        """
-        No default collect behavior. You must implement this method.
- 
-        This method must return a Twisted deferred. The deferred results will
-        be sent to the onResult then either onSuccess or onError callbacks
-        below.
-
-        This method really is run by zenpython daemon. Check zenpython.log
-        for any log messages.
-        """
-
-        log.debug('Starting SnmpRaritanPDU collect')
-        log.debug('config:{}'.format(config))
-        ds0 = config.datasources[0]
-        # Open the Snmp AgentProxy connection
-        self._snmp_proxy = get_snmp_proxy(ds0, config)
-
-        # NB NB NB - When getting scalars, they must all come from the SAME snmp table
-
-        # Now get data - 1 scalar OIDs
-        d=getTableStuff(self._snmp_proxy, [ measurementsInletSensorValue, 
-            ]) 
-        # process here to get ..............
-        log.debug('SnmpRaritanPDU data:{}'.format(d))
-        return d
+        return NotImplementedError
 
     def onResult(self, result, config):
         """
@@ -190,38 +154,7 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
         return result
  
     def onSuccess(self, result, config):
-        """
-        Called only on success. After onResult, before onComplete.
-        You should return a data structure with zero or more events, values
-        and maps.
-        Note that values is a dictionary and events and maps are lists.
-        """
-
-        log.debug( 'In success - result is %s and config is %s ' % (result, config))
-        # Next line creates a dictionary like
-        #          {'values': defaultdict(<type 'dict'>, {}), 'events': [], 'maps':[]}
-        # the new_data method is defined in PythonDataSource.py in the Python Collector
-        #     ZenPack, datasources directory
-
-        data = self.new_data()
-
-        for ds in config.datasources:
-            snmp_index = ds.params.get('snmpindex')
-            for sensorName, sensorProp in self.sensorType.items():
-                for var in self.sensorVars:
-                    pass
-                    param_name = '{}_{}'.format(sensorName, var)
-                    digits = int(ds.params.get(param_name))
-                    sensor_type = sensorProp[0]
-                    oid = '{}.{}.{}'.format(measurementsInletSensorValue, snmp_index, sensor_type)
-                    if not oid.startswith('.'):
-                        oid = '.'+oid
-                    sensor_value = float(result[measurementsInletSensorValue][oid]) / (10 ** digits)
-                    try:
-                        data['values'][ds.component][sensorProp[1]] = sensor_value
-                    except:
-                        pass
-        return data
+        return result
             
     def onError(self, result, config):
         """
@@ -252,5 +185,114 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
         return result
 
 
+class SnmpRaritanInlet(SnmpRaritanPDU):
+
+    sensorType = {
+            'activeEnergy': [8, 'active_energy'],
+            'activePower': [5, 'active_power'],
+            'apparentPower': [6, 'apparent_power'],
+            'frequency': [23, 'frequency'],
+            'powerFactor': [7, 'power_factor'],
+            'rmsCurrent': [1, 'rms_current'],
+            'rmsVoltage': [4, 'rms_voltage'],
+            'unbalancedCurrent': [3, 'unbalanced_current'],
+            }
+
+    def collect(self, config):
+        """
+        This method really is run by zenpython daemon. Check zenpython.log
+        for any log messages.
+        """
+
+        log.debug('Starting SnmpRaritanInlet collect')
+        ds0 = config.datasources[0]
+        # Open the Snmp AgentProxy connection
+        self._snmp_proxy = get_snmp_proxy(ds0, config)
+
+        d=getTableStuff(self._snmp_proxy, [ measurementsInletSensorValue, 
+            ]) 
+        log.debug('SnmpRaritanInlet data:{}'.format(d))
+        return d
+
+    def onSuccess(self, result, config):
+        """
+        Called only on success. After onResult, before onComplete.
+        """
+
+        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+
+        data = self.new_data()
+
+        for ds in config.datasources:
+            snmp_index = ds.params.get('snmpindex')
+            for sensorName, sensorProp in self.sensorType.items():
+                for var in self.sensorVars:
+                    param_name = '{}_{}'.format(sensorName, var)
+                    digits = int(ds.params.get(param_name))
+                    sensor_type = sensorProp[0]
+                    oid = '{}.{}.{}'.format(measurementsInletSensorValue, snmp_index, sensor_type)
+                    if not oid.startswith('.'):
+                        oid = '.'+oid
+                    sensor_value = float(result[measurementsInletSensorValue][oid]) / (10 ** digits)
+                    try:
+                        data['values'][ds.component][sensorProp[1]] = sensor_value
+                    except:
+                        pass
+        return data
 
 
+class SnmpRaritanOutlet(SnmpRaritanPDU):
+
+    sensorType = {
+            'activeEnergy': [8, 'active_energy'],
+            'activePower': [5, 'active_power'],
+            'apparentPower': [6, 'apparent_power'],
+            'frequency': [23, 'frequency'],
+            'powerFactor': [7, 'power_factor'],
+            'rmsCurrent': [1, 'rms_current'],
+            'rmsVoltage': [4, 'rms_voltage'],
+            }
+
+    def collect(self, config):
+        """
+        This method really is run by zenpython daemon. Check zenpython.log
+        for any log messages.
+        """
+
+        log.debug('Starting SnmpRaritanInlet collect')
+        ds0 = config.datasources[0]
+        # Open the Snmp AgentProxy connection
+        self._snmp_proxy = get_snmp_proxy(ds0, config)
+
+        d=getTableStuff(self._snmp_proxy, [ measurementsOutletSensorValue,
+           ])
+        log.debug('SnmpRaritanOutlet data:{}'.format(d))
+        return d
+
+    def onSuccess(self, result, config):
+        """
+        Called only on success. After onResult, before onComplete.
+        """
+
+        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+
+        data = self.new_data()
+
+        for ds in config.datasources:
+            snmp_index = ds.params.get('snmpindex')
+            for sensorName, sensorProp in self.sensorType.items():
+                for var in self.sensorVars:
+                    param_name = '{}_{}'.format(sensorName, var)
+                    digits = int(ds.params.get(param_name))
+                    sensor_type = sensorProp[0]
+                    oid = '{}.{}.{}'.format(measurementsOutletSensorValue, snmp_index, sensor_type)
+                    if not oid.startswith('.'):
+                        oid = '.'+oid
+                    sensor_value = float(result[measurementsOutletSensorValue][oid]) / (10 ** digits)
+                    try:
+                        data['values'][ds.component][sensorProp[1]] = sensor_value
+                    except:
+                        pass
+        return data
+                                                                                                                                                                                     
+                                                                                                                         
