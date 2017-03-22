@@ -7,9 +7,14 @@ from pynetsnmp.twistedsnmp import AgentProxy
 import logging
 log = logging.getLogger('zen.PythonRaritan')
 
-measurementsInletSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.2.3.1.2'
-measurementsInletSensorState       = '1.3.6.1.4.1.13742.6.5.2.3.1.3'
-measurementsInletSensorValue       = '1.3.6.1.4.1.13742.6.5.2.3.1.4'
+measurementsInletSensorIsAvailable  = '1.3.6.1.4.1.13742.6.5.2.3.1.2'
+measurementsInletSensorState        = '1.3.6.1.4.1.13742.6.5.2.3.1.3'
+measurementsInletSensorValue        = '1.3.6.1.4.1.13742.6.5.2.3.1.4'
+
+measurementsOutletSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.4.3.1.2'
+measurementsOutletSensorState       = '1.3.6.1.4.1.13742.6.5.4.3.1.3'
+measurementsOutletSensorValue       = '1.3.6.1.4.1.13742.6.5.4.3.1.4'
+
 
 def getSnmpV3Args(ds0):
     snmpv3Args = []
@@ -141,9 +146,6 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
                 param_name = '{}_{}'.format(sensorName, var)
                 params[param_name] = getattr(context, param_name, '')
 
-        #params['activeEnergy_units']  = context.activeEnergy_units
-        #log.info('Raritan context units:{}'.format(getattr(context, 'activeEnergy_units', '')))
-        #params['activeEnergy_digits'] = context.activeEnergy_digits
         params['snmpindex'] = context.snmpindex
         log.info(' params is %s \n' % (params))
         return params
