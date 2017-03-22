@@ -49,50 +49,127 @@ classes:
     label: Inlet
     monitoring_templates: [RaritanInlet]
     properties:
-      pdu_id:
-        type: int
-      inlet_number:
-        type: int
       activeEnergy_digits:
         type: int
+        grid_display: False
       activeEnergy_units:
         type: int
+        grid_display: False
       activePower_digits:
         type: int
+        grid_display: False
       activePower_units:
         type: int
+        grid_display: False
       apparentPower_digits:
         type: int
+        grid_display: False
       apparentPower_units:
         type: int
+        grid_display: False
       frequency_digits:
         type: int
+        grid_display: False
       frequency_units:
         type: int
+        grid_display: False
       powerFactor_digits:
         type: int
+        grid_display: False
       powerFactor_units:
         type: int
+        grid_display: False
       rmsCurrent_digits:
         type: int
+        grid_display: False
       rmsCurrent_units:
         type: int
+        grid_display: False
       rmsVoltage_digits:
         type: int
+        grid_display: False
       rmsVoltage_units:
         type: int
+        grid_display: False
       unbalancedCurrent_digits:
         type: int
+        grid_display: False
       unbalancedCurrent_units:
         type: int
+        grid_display: False
 
   RaritanOutlet:
     base: [zenpacklib.Component]
     label: Outlet
+    properties:
+      activeEnergy_digits:
+        type: int
+        grid_display: False
+      activeEnergy_units:
+        type: int
+        grid_display: False
+      activePower_digits:
+        type: int
+        grid_display: False
+      activePower_units:
+        type: int
+        grid_display: False
+      apparentPower_digits:
+        type: int
+        grid_display: False
+      apparentPower_units:
+        type: int
+        grid_display: False
+      frequency_digits:
+        type: int
+        grid_display: False
+      frequency_units:
+        type: int
+        grid_display: False
+      powerFactor_digits:
+        type: int
+        grid_display: False
+      powerFactor_units:
+        type: int
+        grid_display: False
+      rmsCurrent_digits:
+        type: int
+        grid_display: False
+      rmsCurrent_units:
+        type: int
+        grid_display: False
+      rmsVoltage_digits:
+        type: int
+        grid_display: False
+      rmsVoltage_units:
+        type: int
+        grid_display: False
+      unbalancedCurrent_digits:
+        type: int
+        grid_display: False
+      unbalancedCurrent_units:
+        type: int
+        grid_display: False
 
   RaritanOCP:
     base: [zenpacklib.Component]
     label: Overcurrent Protector
+    properties:
+      status:
+        type: string
+      ocp_type:
+        type: string
+      lines:
+        type: string
+      protected_outlets:
+        type: string
+      rmsCurrent_digits:
+        type: int
+        grid_display: False
+      rmsCurrent_units:
+        type: int
+        grid_display: False
+
 
 device_classes:
   /Datacenter/Raritan:
@@ -162,8 +239,114 @@ device_classes:
             datapoints:
               active_energy:
                 rrdtype: GAUGE
+              active_power:
+                rrdtype: GAUGE
+              apparent_power:
+                rrdtype: GAUGE
+              frequency:
+                rrdtype: GAUGE
+              power_factor:
+                rrdtype: GAUGE
               rms_current:
                 rrdtype: GAUGE
+              rms_voltage:
+                rrdtype: GAUGE
+              unbalanced_current:
+                rrdtype: GAUGE
+              state:
+                rrdtype: GAUGE
+
+        graphs:
+          Active Energy:
+            height: 100
+            width: 1000
+            units: 'Wh'
+            graphpoints:
+              Active_Energy:
+                dpName: Inlet_active_energy
+          Power:
+            height: 100
+            width: 1000
+            units: 'W'
+            graphpoints:
+              Active_Power:
+                dpName: Inlet_active_power
+              Apparent_Power:
+                dpName: Inlet_apparent_power
+          Frequency:
+            height: 100
+            width: 1000
+            units: 'Hz'
+            graphpoints:
+              Frequency:
+                dpName: Inlet_frequency
+          Power Factor:
+            height: 100
+            width: 1000
+            units: ''
+            graphpoints:
+              Power_Factor:
+                dpName: Inlet_power_factor
+          Current:
+            height: 100
+            width: 1000
+            units: 'A'
+            graphpoints:
+              RMS_Current:
+                dpName: Inlet_rms_current
+          Voltage:
+            height: 100
+            width: 1000
+            units: 'V'
+            graphpoints:
+              RMS_Voltage:
+                dpName: Inlet_rms_voltage
+          Unbalanced Current:
+            height: 100
+            width: 1000
+            units: '%'
+            graphpoints:
+              Unbalanced_Current:
+                dpName: Inlet_unbalanced_current
+
+      RaritanOutlet:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanOutlet
+ 
+        datasources:
+          Outlet:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanPDU.SnmpRaritanOutlet
+
+            datapoints:
+              active_energy:
+                rrdtype: GAUGE
+              active_power:
+                rrdtype: GAUGE
+              apparent_power:
+                rrdtype: GAUGE
+              frequency:
+                rrdtype: GAUGE
+              power_factor:
+                rrdtype: GAUGE
+              rms_current:
+                rrdtype: GAUGE
+              rms_voltage:
+                rrdtype: GAUGE
+              state: 
+                rrdtype: GAUGE
+              
+      RaritanOCP:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanOCP
+
+        datasources:
+          OCP:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanPDU.SnmpRaritanOCP
+
+            datapoints:
+              rms_current:
+                rrdtype: GAUGE
+              
 
 class_relationships:
   - RaritanDevice 1:MC RaritanTemperatureSensor

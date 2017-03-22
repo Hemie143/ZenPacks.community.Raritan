@@ -78,6 +78,19 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
         'zMaxOIDPerRequest',
         )
 
+    sensorType = {
+        'activeEnergy': [8, 'active_energy'],
+        'activePower': [5, 'active_power'],
+        'apparentPower': [6, 'apparent_power'],
+        'frequency': [23, 'frequency'],
+        'powerFactor': [7, 'power_factor'],
+        'rmsCurrent': [1, 'rms_current'],
+        'rmsVoltage': [4, 'rms_voltage'],
+        'unbalancedCurrent': [3, 'unbalanced_current'],
+        }
+
+    sensorVars = ['units', 'digits']
+
     @classmethod
     def config_key(cls, datasource, context):
         """
@@ -121,12 +134,18 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
         information at the device level it is easier to just use
         proxy_attributes as mentioned above.
         """
-        log.debug('Starting SnmpRaritanPDU params')
+        log.info('Starting SnmpRaritanPDU params')
         params = {}
-        params['activeEnergy_units']  = context.activeEnergy_units
-        params['activeEnergy_digits'] = context.activeEnergy_digits
+        for sensorName in cls.sensorType:
+            for var in cls.sensorVars:
+                param_name = '{}_{}'.format(sensorName, var)
+                params[param_name] = getattr(context, param_name, '')
+
+        #params['activeEnergy_units']  = context.activeEnergy_units
+        #log.info('Raritan context units:{}'.format(getattr(context, 'activeEnergy_units', '')))
+        #params['activeEnergy_digits'] = context.activeEnergy_digits
         params['snmpindex'] = context.snmpindex
-        log.debug(' params is %s \n' % (params))
+        log.info(' params is %s \n' % (params))
         return params
 
  
@@ -186,16 +205,20 @@ class SnmpRaritanInlet(PythonDataSourcePlugin):
 
         for ds in config.datasources:
             snmp_index = ds.params.get('snmpindex')
-            digits = int(ds.params.get('activeEnergy_digits'))
-            sensor_type = 8
-            oid = '{}.{}.{}'.format(measurementsInletSensorValue, snmp_index, sensor_type)
-            if not oid.startswith('.'):
-                oid = '.'+oid
-            sensor_value = float(result[measurementsInletSensorValue][oid]) / (10 ** digits)
-            try:
-                data['values'][ds.component]['active_energy'] = sensor_value
-            except:
-                pass
+            for sensorName, sensorProp in self.sensorType.items():
+                for var in self.sensorVars:
+                    pass
+                    param_name = '{}_{}'.format(sensorName, var)
+                    digits = int(ds.params.get(param_name))
+                    sensor_type = sensorProp[0]
+                    oid = '{}.{}.{}'.format(measurementsInletSensorValue, snmp_index, sensor_type)
+                    if not oid.startswith('.'):
+                        oid = '.'+oid
+                    sensor_value = float(result[measurementsInletSensorValue][oid]) / (10 ** digits)
+                    try:
+                        data['values'][ds.component][sensorProp[1]] = sensor_value
+                    except:
+                        pass
         return data
             
     def onError(self, result, config):
