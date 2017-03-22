@@ -21,7 +21,6 @@ class RaritanOutlet(SnmpPlugin):
 
     sensorType = {
             'rmsCurrent': 1,
-            'unbalancedCurrent': 3,
             'rmsVoltage': 4,
             'activePower': 5,
             'apparentPower': 6,
@@ -55,11 +54,11 @@ class RaritanOutlet(SnmpPlugin):
             outletData['title'] = title
             outletData['snmpindex'] = snmpindex
 
-            inletSensors = tabledata.get('outletSensorConfigurationTable', {})
-            log.debug('sensors:{}'.format(inletSensors))
+            outletSensors = tabledata.get('outletSensorConfigurationTable', {})
+            log.debug('sensors:{}'.format(outletSensors))
             for sensor, sensorNum in self.sensorType.items():
                 sensorIndex = '{}.{}'.format(snmpindex, sensorNum)
-                outletSensor = inletSensors[sensorIndex]
+                outletSensor = outletSensors[sensorIndex]
                 outletData['{}_units'.format(sensor)]=outletSensor['outletSensorUnits']
                 outletData['{}_digits'.format(sensor)]=outletSensor['outletSensorDecimalDigits']
 

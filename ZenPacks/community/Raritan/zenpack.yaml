@@ -180,6 +180,7 @@ device_classes:
         - community.snmp.RaritanDevice
         - community.snmp.RaritanDeviceEnv
         - community.snmp.RaritanInlet
+        - community.snmp.RaritanOutlet
         - zenoss.snmp.NewDeviceMap
         - zenoss.snmp.DeviceMap
         - zenoss.snmp.SnmpV3EngineIdMap
