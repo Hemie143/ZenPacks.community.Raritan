@@ -406,6 +406,14 @@ device_classes:
               rms_current:
                 rrdtype: GAUGE
               
+        graphs:
+           Current:
+            height: 100
+            width: 1000
+            units: 'A'
+            graphpoints:
+              RMS_Current:
+                dpName: OCP_rms_current
 
 class_relationships:
   - RaritanDevice 1:MC RaritanTemperatureSensor
