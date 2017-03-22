@@ -3,3 +3,4 @@ from SnmpRaritanEnvSensor import SnmpRaritanTempSensor
 from SnmpRaritanEnvSensor import SnmpRaritanHumidSensor
 from SnmpRaritanPDU import SnmpRaritanInlet
 from SnmpRaritanPDU import SnmpRaritanOutlet
+from SnmpRaritanPDU import SnmpRaritanOCP

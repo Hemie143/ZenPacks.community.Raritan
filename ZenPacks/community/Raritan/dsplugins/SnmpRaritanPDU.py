@@ -15,6 +15,10 @@ measurementsOutletSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.4.3.1.2'
 measurementsOutletSensorState       = '1.3.6.1.4.1.13742.6.5.4.3.1.3'
 measurementsOutletSensorValue       = '1.3.6.1.4.1.13742.6.5.4.3.1.4'
 
+measurementsOverCurrentProtectorSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.3.3.1.2'
+measurementsOverCurrentProtectorSensorState       = '1.3.6.1.4.1.13742.6.5.3.3.1.3'
+measurementsOverCurrentProtectorSensorValue       = '1.3.6.1.4.1.13742.6.5.3.3.1.4'
+
 def getSnmpV3Args(ds0):
     snmpv3Args = []
     if '3' in ds0.zSnmpVer:
@@ -259,7 +263,7 @@ class SnmpRaritanOutlet(SnmpRaritanPDU):
         for any log messages.
         """
 
-        log.debug('Starting SnmpRaritanInlet collect')
+        log.debug('Starting SnmpRaritanOutlet collect')
         ds0 = config.datasources[0]
         # Open the Snmp AgentProxy connection
         self._snmp_proxy = get_snmp_proxy(ds0, config)
@@ -295,4 +299,52 @@ class SnmpRaritanOutlet(SnmpRaritanPDU):
                         pass
         return data
                                                                                                                                                                                      
-                                                                                                                         
+
+class SnmpRaritanOCP(SnmpRaritanPDU):
+
+    sensorType = {
+            'rmsCurrent': [1, 'rms_current'],
+            'trip': [15, 'trip'],
+            }
+
+    def collect(self, config):
+        """
+        This method really is run by zenpython daemon. Check zenpython.log
+        for any log messages.
+        """
+
+        log.debug('Starting SnmpRaritanOCP collect')
+        ds0 = config.datasources[0]
+        # Open the Snmp AgentProxy connection
+        self._snmp_proxy = get_snmp_proxy(ds0, config)
+
+        d=getTableStuff(self._snmp_proxy, [ measurementsOverCurrentProtectorSensorValue,
+           ])
+        log.debug('SnmpRaritanOCP data:{}'.format(d))
+        return d
+
+    def onSuccess(self, result, config):
+        """
+        Called only on success. After onResult, before onComplete.
+        """
+
+        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+        
+        data = self.new_data()
+
+        for ds in config.datasources:
+            snmp_index = ds.params.get('snmpindex')
+            for sensorName, sensorProp in self.sensorType.items():
+                for var in self.sensorVars:
+                    param_name = '{}_{}'.format(sensorName, var)
+                    digits = int(ds.params.get(param_name))
+                    sensor_type = sensorProp[0]
+                    oid = '{}.{}.{}'.format(measurementsOverCurrentProtectorSensorValue, snmp_index, sensor_type)
+                    if not oid.startswith('.'):
+                        oid = '.'+oid
+                    sensor_value = float(result[measurementsOverCurrentProtectorSensorValue][oid]) / (10 ** digits)
+                    try:
+                        data['values'][ds.component][sensorProp[1]] = sensor_value
+                    except:
+                        pass
+        return data

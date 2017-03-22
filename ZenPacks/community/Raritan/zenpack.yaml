@@ -155,6 +155,7 @@ classes:
   RaritanOCP:
     base: [zenpacklib.Component]
     label: Overcurrent Protector
+    monitoring_templates: [RaritanOCP]
     properties:
       status:
         type: string
