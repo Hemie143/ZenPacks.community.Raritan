@@ -54,6 +54,7 @@ To Do
     * Add thresholds in sensor templates
     * Replace Hardware Model with something readable
     * Device modeling: add condition function
+    * Add PDU Pole monitoring
     * ...
 
 
