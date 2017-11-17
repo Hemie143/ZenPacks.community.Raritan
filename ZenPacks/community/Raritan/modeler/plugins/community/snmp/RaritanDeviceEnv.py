@@ -32,10 +32,17 @@ class RaritanDeviceEnv(SnmpPlugin):
                 relname='raritanHumiditySensors',
                 compname=self.compname,
                 modname='ZenPacks.community.Raritan.RaritanHumiditySensor')
+        onOffRelMap = RelationshipMap(
+                relname='raritanOnOffSensors',
+                compname=self.compname,
+                modname='ZenPacks.community.Raritan.RaritanOnOffSensor')
 
         for snmpindex, row in tabledata.get('externalSensor', {}).items():
             sensor_type = row.get('externalSensorType')
             name = row.get('externalSensorName')
+
+            log.info('index: {} - type: {} - name: {}'.format(snmpindex, sensor_type, name))
+
             description = row.get('externalSensorDescription')
             title = name
             if description:
@@ -43,7 +50,7 @@ class RaritanDeviceEnv(SnmpPlugin):
 
             # Next two cases to merge into one ?
             # 
-            if sensor_type==10:      # Temperature sensor
+            if sensor_type == 10:      # Temperature sensor
                 log.debug('Found temp sensor:{}'.format(name))
                 tempRelMap.append(ObjectMap(
                     compname=self.compname,
@@ -58,7 +65,7 @@ class RaritanDeviceEnv(SnmpPlugin):
                         'sensor_digits': row.get('externalSensorDecimalDigits', ''),
                         'port': row.get('externalSensorPort', ''),
                         }))
-            elif sensor_type==11:    # Humidity sensor
+            elif sensor_type == 11:  # Humidity sensor
                 log.debug('Found humid sensor:{}'.format(name))
                 humidRelMap.append(ObjectMap(
                     compname=self.compname,
@@ -72,11 +79,26 @@ class RaritanDeviceEnv(SnmpPlugin):
                         'sensor_units': row.get('externalSensorUnits', ''),
                         'sensor_digits': row.get('externalSensorDecimalDigits', ''),
                         'port': row.get('externalSensorPort', ''),
+                    }))
+            elif sensor_type == 14:    # Humidity sensor
+                log.debug('Found OnOff sensor:{}'.format(name))
+                onOffRelMap.append(ObjectMap(
+                    compname=self.compname,
+                    modname='ZenPacks.community.Raritan.RaritanOnOffSensor',
+                    data={
+                        'id': self.prepId(name),
+                        'title': title,
+                        'snmpindex': snmpindex.strip('.'),
+                        'serial': row.get('externalSensorSerialNumber', ''),
+                        'sensor_type': row.get('externalSensorType', ''),
+                        'sensor_units': row.get('externalSensorUnits', ''),
+                        'sensor_digits': row.get('externalSensorDecimalDigits', ''),
+                        'port': row.get('externalSensorPort', ''),
                         }))
-        
         maps.extend([
             tempRelMap,
             humidRelMap,
+            onOffRelMap
             ])
 
         return maps

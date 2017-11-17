@@ -1,5 +1,13 @@
 name: ZenPacks.community.Raritan
 
+class_relationships:
+  - RaritanDevice 1:MC RaritanTemperatureSensor
+  - RaritanDevice 1:MC RaritanHumiditySensor
+  - RaritanDevice 1:MC RaritanOnOffSensor
+  - RaritanDevice 1:MC RaritanInlet
+  - RaritanDevice 1:MC RaritanOutlet
+  - RaritanDevice 1:MC RaritanOCP
+
 classes:
   RaritanDevice:
     base: [zenpacklib.Device]
@@ -43,6 +51,23 @@ classes:
         grid_display: False
       port:
         label: Port
+
+  RaritanOnOffSensor:
+    base: [zenpacklib.Component]
+    label: OnOff Sensor
+    monitoring_templates: [RaritanOnOffSensor]
+    properties:
+      serial:
+        label: Serial Number
+      sensor_type:
+        grid_display: False
+      sensor_units:
+        grid_display: False
+      sensor_digits:
+        grid_display: False
+      port:
+        label: Port
+
 
   RaritanInlet:
     base: [zenpacklib.Component]
@@ -241,6 +266,27 @@ device_classes:
               humidity:
                 dpName: HumidSensor_humidity
 
+      RaritanOnOffSensor:
+        targetPythonClass: ZenPacks.community.Raritan.RaritanOnOffSensor
+
+        datasources:
+          OnOffSensor:
+            type: Python
+            plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanEnvSensor.SnmpRaritanOnOffSensor
+
+            datapoints:
+              onoff:
+                rrdtype: GAUGE
+        graphs:
+          OnOff:
+            height: 100
+            width: 1000
+            miny: -1
+            maxy: 11
+            graphpoints:
+              onoff:
+                dpName: OnOffSensor_onoff
+
       RaritanInlet:
         targetPythonClass: ZenPacks.community.Raritan.RaritanInlet
 
@@ -414,12 +460,4 @@ device_classes:
             graphpoints:
               RMS_Current:
                 dpName: OCP_rms_current
-
-class_relationships:
-  - RaritanDevice 1:MC RaritanTemperatureSensor
-  - RaritanDevice 1:MC RaritanHumiditySensor
-  - RaritanDevice 1:MC RaritanInlet
-  - RaritanDevice 1:MC RaritanOutlet
-  - RaritanDevice 1:MC RaritanOCP
-
 

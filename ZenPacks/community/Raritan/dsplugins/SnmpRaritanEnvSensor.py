@@ -264,6 +264,8 @@ class SnmpRaritanHumidSensor(SnmpRaritanEnvSensor):
             # 2. Add availability
             # 3. Add state
             # 4. Refactor for all sensors (temperature and humidity)
+            # 5. Test
+            # 6. Test2
             for ds in config.datasources:
                 snmp_index = ds.params.get('snmpindex')
                 sensor_digits = int(ds.params.get('sensor_digits'))
@@ -280,5 +282,33 @@ class SnmpRaritanHumidSensor(SnmpRaritanEnvSensor):
             data['maps'] = []
             log.debug( 'data is %s ' % (data))
             return data
+
+
+class SnmpRaritanOnOffSensor(SnmpRaritanEnvSensor):
+    def onSuccess(self, result, config):
+        """
+        Called only on success. After onResult, before onComplete.
+        You should return a data structure with zero or more events, values
+        and maps.
+        """
+
+        log.debug('In success - result is %s and config is %s ' % (result, config))
+        data = self.new_data()
+
+        for ds in config.datasources:
+            snmp_index = ds.params.get('snmpindex')
+            oid = measurementsExternalSensorState + '.' + snmp_index
+            if not oid.startswith('.'):
+                oid = '.' + oid
+            sensor_state = float(result[measurementsExternalSensorState][oid])
+            try:
+                data['values'][ds.component]['onoff'] = sensor_state
+            except:
+                pass
+
+        data['events'] = []
+        data['maps'] = []
+        log.debug('OnOff data is %s ' % (data))
+        return data
 
 
