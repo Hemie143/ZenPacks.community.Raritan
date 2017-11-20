@@ -237,6 +237,20 @@ device_classes:
             datapoints:
               temperature:
                 rrdtype: GAUGE
+
+        thresholds:
+          High Temperature:
+            dsnames: [TempSensor_temperature]
+            eventClass: /HW/Temperature
+            severity: 5
+            maxval: 35
+          OnCallSMS High Temp:
+            dsnames: [TempSensor_temperature]
+            eventClass: /HW/Temperature
+            severity: 5
+            maxval: 30
+            timePeriod: 30 minutes
+
         graphs:
           Temperature:
             height: 100
@@ -245,6 +259,7 @@ device_classes:
             graphpoints:
               temperature:
                 dpName: TempSensor_temperature
+                includeThresholds: true
 
       RaritanHumiditySensor:
         targetPythonClass: ZenPacks.community.Raritan.RaritanHumiditySensor
@@ -257,6 +272,11 @@ device_classes:
             datapoints:
               humidity:
                 rrdtype: GAUGE
+        thresholds:
+          Low Humidity:
+            dsnames: [HumidSensor_humidity]
+            eventClass: /Environ
+            minval: 9
         graphs:
           Humidity:
             height: 100
@@ -314,6 +334,47 @@ device_classes:
                 rrdtype: GAUGE
               state:
                 rrdtype: GAUGE
+
+        thresholds:
+          Inlet High Frequency:
+            dsnames: [Inlet_frequency]
+            eventClass: /PDU
+            maxval: '51'
+          Inlet High Voltage Critical:
+            dsnames: [Inlet_rms_voltage]
+            eventClass: /PDU
+            severity: 5
+            maxval: '440'
+          OnCallSMS_Inlet_Power:
+            dsnames: [Inlet_active_power]
+            eventClass: /PDU/Inlet
+            severity: 5
+            minval: '1'
+          Inlet Low Power:
+            dsnames: [Inlet_active_power]
+            eventClass: /PDU
+            minval: '10'
+          Inlet Low Voltage Warning:
+            dsnames: [Inlet_rms_voltage]
+            eventClass: /PDU
+            minval: '369'
+          Inlet High Voltage Warning:
+            dsnames: [Inlet_rms_voltage]
+            eventClass: /PDU
+            maxval: '428'
+          Inlet Low Frequency:
+            dsnames: [Inlet_frequency]
+            eventClass: /PDU
+            minval: '49'
+          Inlet Low Voltage Critical:
+            dsnames: [Inlet_rms_voltage]
+            eventClass: /PDU
+            severity: 5
+            minval: '357'
+          Inlet Power Factor:
+            dsnames: [Inlet_power_factor]
+            eventClass: /PDU
+            minval: '0.6'
 
         graphs:
           Active Energy:
@@ -393,7 +454,36 @@ device_classes:
                 rrdtype: GAUGE
               state: 
                 rrdtype: GAUGE
-
+        thresholds:
+          Outlet Low Voltage Critical:
+            dsnames: [Outlet_rms_voltage]
+            eventClass: /PDU
+            minval: '206'
+          Outlet High Voltage Critical:
+            dsnames: [Outlet_rms_voltage]
+            eventClass: /PDU
+            severity: 5
+            maxval: '254'
+          Outlet High Voltage Warning:
+            dsnames: [Outlet_rms_voltage]
+            eventClass: /PDU
+            maxval: '247'
+          Outlet Low Voltage Warning:
+            dsnames: [Outlet_rms_voltage]
+            eventClass: /PDU
+            minval: '213'
+          Outlet Power Factor:
+            dsnames: [Outlet_power_factor]
+            eventClass: /PDU
+            minval: '0.6'
+          Outlet Low Frequency:
+            dsnames: [Outlet_frequency]
+            eventClass: /PDU
+            minval: '49'
+          Outlet High Frequency:
+            dsnames: [Outlet_frequency]
+            eventClass: /PDU
+            maxval: '51'
         graphs:
           Active Energy:
             height: 100
