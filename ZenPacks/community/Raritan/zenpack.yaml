@@ -484,6 +484,7 @@ device_classes:
             dsnames: [Outlet_power_factor]
             eventClass: /PDU/Outlet
             minval: '0.6'
+            enabled: false
           Outlet Low Frequency:
             dsnames: [Outlet_frequency]
             eventClass: /PDU/Outlet
