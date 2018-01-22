@@ -1,4 +1,6 @@
- 
+
+from twisted.internet.defer import inlineCallbacks, returnValue
+
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import PythonDataSourcePlugin
 
 from pynetsnmp.twistedsnmp import AgentProxy
@@ -128,7 +130,7 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
         log.debug(' params is %s \n' % (params))
         return params
 
- 
+    @inlineCallbacks
     def collect(self, config):
         """
         No default collect behavior. You must implement this method.
@@ -150,13 +152,12 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
         # NB NB NB - When getting scalars, they must all come from the SAME snmp table
 
         # Now get data - 1 scalar OIDs
-        d=getTableStuff(self._snmp_proxy, [ measurementsExternalSensorIsAvailable, 
-            measurementsExternalSensorState,
-            measurementsExternalSensorValue,
-            ]) 
-        # process here to get ..............
+        d = yield getTableStuff(self._snmp_proxy, [ measurementsExternalSensorIsAvailable,
+                measurementsExternalSensorState,
+                measurementsExternalSensorValue,
+                ])
         log.debug('SnmpRaritanTempSensor data:{}'.format(d))
-        return d
+        returnValue(d)
 
     def onResult(self, result, config):
         """
@@ -238,53 +239,54 @@ class SnmpRaritanTempSensor(SnmpRaritanEnvSensor):
 
         data['events'] = []
         data['maps'] = []
-        log.debug( 'data is %s ' % (data))
+        log.debug('data is %s ' % (data))
         return data
 
 
 class SnmpRaritanHumidSensor(SnmpRaritanEnvSensor):
 
-        def onSuccess(self, result, config):
-            """
-            Called only on success. After onResult, before onComplete.
-            You should return a data structure with zero or more events, values
-            and maps.
-            """
+    def onSuccess(self, result, config):
+        """
+        Called only on success. After onResult, before onComplete.
+        You should return a data structure with zero or more events, values
+        and maps.
+        """
 
-            log.debug( 'In success - result is %s and config is %s ' % (result, config))
-            # Next line creates a dictionary like
-            #          {'values': defaultdict(<type 'dict'>, {}), 'events': [], 'maps':[]}
-            # the new_data method is defined in PythonDataSource.py in the Python Collector
-            #     ZenPack, datasources directory
+        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+        # Next line creates a dictionary like
+        #          {'values': defaultdict(<type 'dict'>, {}), 'events': [], 'maps':[]}
+        # the new_data method is defined in PythonDataSource.py in the Python Collector
+        #     ZenPack, datasources directory
 
-            data = self.new_data()
+        data = self.new_data()
 
-            # To do:
-            # 1. Handle different units (Fahrenheit?)
-            # 2. Add availability
-            # 3. Add state
-            # 4. Refactor for all sensors (temperature and humidity)
-            # 5. Test
-            # 6. Test2
-            for ds in config.datasources:
-                snmp_index = ds.params.get('snmpindex')
-                sensor_digits = int(ds.params.get('sensor_digits'))
-                oid = measurementsExternalSensorValue+'.'+snmp_index
-                if not oid.startswith('.'):
-                    oid = '.'+oid
-                sensor_value = float(result[measurementsExternalSensorValue][oid]) / (10 ** sensor_digits)
-                try:
-                    data['values'][ds.component]['humidity'] = sensor_value
-                except:
-                    pass
+        # To do:
+        # 1. Handle different units (Fahrenheit?)
+        # 2. Add availability
+        # 3. Add state
+        # 4. Refactor for all sensors (temperature and humidity)
+        # 5. Test
+        # 6. Test2
+        for ds in config.datasources:
+            snmp_index = ds.params.get('snmpindex')
+            sensor_digits = int(ds.params.get('sensor_digits'))
+            oid = measurementsExternalSensorValue+'.'+snmp_index
+            if not oid.startswith('.'):
+                oid = '.'+oid
+            sensor_value = float(result[measurementsExternalSensorValue][oid]) / (10 ** sensor_digits)
+            try:
+                data['values'][ds.component]['humidity'] = sensor_value
+            except:
+                pass
 
-            data['events'] = []
-            data['maps'] = []
-            log.debug( 'data is %s ' % (data))
-            return data
+        data['events'] = []
+        data['maps'] = []
+        log.debug( 'data is %s ' % (data))
+        return data
 
 
 class SnmpRaritanOnOffSensor(SnmpRaritanEnvSensor):
+
     def onSuccess(self, result, config):
         """
         Called only on success. After onResult, before onComplete.

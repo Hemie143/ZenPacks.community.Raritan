@@ -249,6 +249,7 @@ device_classes:
             eventClass: /HW/Temperature
             severity: 5
             maxval: 30
+            type: DurationThreshold
             timePeriod: 30 minutes
 
         graphs:

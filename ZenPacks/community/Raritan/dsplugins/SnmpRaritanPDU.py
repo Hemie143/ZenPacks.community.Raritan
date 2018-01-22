@@ -1,4 +1,6 @@
- 
+
+from twisted.internet.defer import inlineCallbacks, returnValue
+
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import PythonDataSourcePlugin
 
 from pynetsnmp.twistedsnmp import AgentProxy
@@ -19,6 +21,7 @@ measurementsOverCurrentProtectorSensorIsAvailable = '1.3.6.1.4.1.13742.6.5.3.3.1
 measurementsOverCurrentProtectorSensorState       = '1.3.6.1.4.1.13742.6.5.3.3.1.3'
 measurementsOverCurrentProtectorSensorValue       = '1.3.6.1.4.1.13742.6.5.3.3.1.4'
 
+
 def getSnmpV3Args(ds0):
     snmpv3Args = []
     if '3' in ds0.zSnmpVer:
@@ -36,11 +39,12 @@ def getSnmpV3Args(ds0):
             snmpv3Args += ['-u', ds0.zSnmpSecurityName]
     return snmpv3Args
 
+
 def get_snmp_proxy(ds0, config):
     snmpV3Args = getSnmpV3Args(ds0)
-    log.debug( 'snmpV3Args are %s ' % (snmpV3Args))
+    log.debug('snmpV3Args are %s ' % (snmpV3Args))
     snmp_proxy = AgentProxy(
-        ip = ds0.manageIp,
+        ip=ds0.manageIp,
         port=int(ds0.zSnmpPort),
         timeout=ds0.zSnmpTimeout,
         snmpVersion=ds0.zSnmpVer,
@@ -60,12 +64,13 @@ def getScalarStuff(snmp_proxy, scalarOIDstrings):
     #     input list is > 1 oid - maybe ?????
     # Agent Proxy get returns dict of {oid_str : <value>}
     log.debug('In getScalarStuff - snmp_proxy is %s and scalarOIDstrings is %s \n' % (snmp_proxy, scalarOIDstrings))
-    d=snmp_proxy.get(scalarOIDstrings)
+    d = snmp_proxy.get(scalarOIDstrings)
     return d
+
 
 def getTableStuff(snmp_proxy, OIDstrings):
     log.debug('In getTableStuff - snmp_proxy is %s and OIDstrings is %s \n' % (snmp_proxy, OIDstrings))
-    d=snmp_proxy.getTable(OIDstrings)
+    d = snmp_proxy.getTable(OIDstrings)
     return d
 
    
@@ -105,7 +110,10 @@ class SnmpRaritanPDU(PythonDataSourcePlugin):
         """
         # Logging in this method will be to zenhub.log
 
-        log.debug( 'In config_key context.device().id is %s datasource.getCycleTime(context) is %s datasource.rrdTemplate().id is %s datasource.id is %s datasource.plugin_classname is %s  ' % (context.device().id, datasource.getCycleTime(context), datasource.rrdTemplate().id, datasource.id, datasource.plugin_classname))
+        log.debug('In config_key context.device().id is %s datasource.getCycleTime(context) is %s \
+            datasource.rrdTemplate().id is %s datasource.id is %s datasource.plugin_classname is %s'\
+            % (context.device().id, datasource.getCycleTime(context), datasource.rrdTemplate().id, \
+                datasource.id, datasource.plugin_classname))
         return (
             context.device().id,
             datasource.getCycleTime(context),
@@ -142,7 +150,7 @@ class SnmpRaritanPDU(PythonDataSourcePlugin):
         log.info(' params is %s \n' % (params))
         return params
 
- 
+    @inlineCallbacks
     def collect(self, config):
         return NotImplementedError
 
@@ -153,7 +161,7 @@ class SnmpRaritanPDU(PythonDataSourcePlugin):
         You can omit this method if you want the result of the collect method
         to be used without further processing.
         """
-        log.debug( 'result is %s ' % (result))
+        log.debug('result is %s ' % (result))
 
         return result
  
@@ -168,7 +176,7 @@ class SnmpRaritanPDU(PythonDataSourcePlugin):
         method to be used without further processing. It recommended to
         implement this method to capture errors.
         """
-        log.debug( 'In OnError - result is %s and config is %s ' % (result, config))
+        log.debug('In OnError - result is %s and config is %s ' % (result, config))
         return {
             'events': [{
                 'summary': 'Error getting SnmpRaritanPDU component data with zenpython: %s' % result,
@@ -202,6 +210,7 @@ class SnmpRaritanInlet(SnmpRaritanPDU):
             'unbalancedCurrent': [3, 'unbalanced_current'],
             }
 
+    @inlineCallbacks
     def collect(self, config):
         """
         This method really is run by zenpython daemon. Check zenpython.log
@@ -213,17 +222,17 @@ class SnmpRaritanInlet(SnmpRaritanPDU):
         # Open the Snmp AgentProxy connection
         self._snmp_proxy = get_snmp_proxy(ds0, config)
 
-        d=getTableStuff(self._snmp_proxy, [ measurementsInletSensorValue, 
-            ]) 
+        d = yield getTableStuff(self._snmp_proxy, [measurementsInletSensorValue,
+                                                  ])
         log.debug('SnmpRaritanInlet data:{}'.format(d))
-        return d
+        returnValue(d)
 
     def onSuccess(self, result, config):
         """
         Called only on success. After onResult, before onComplete.
         """
 
-        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+        log.debug('In success - result is %s and config is %s ' % (result, config))
 
         data = self.new_data()
 
@@ -241,7 +250,7 @@ class SnmpRaritanInlet(SnmpRaritanPDU):
                     try:
                         data['values'][ds.component][sensorProp[1]] = sensor_value
                     except:
-                        pass
+                        log.error('SnmpRaritanInlet onSuccess: Error while storing value')
         return data
 
 
@@ -257,6 +266,7 @@ class SnmpRaritanOutlet(SnmpRaritanPDU):
             'rmsVoltage': [4, 'rms_voltage'],
             }
 
+    @inlineCallbacks
     def collect(self, config):
         """
         This method really is run by zenpython daemon. Check zenpython.log
@@ -268,17 +278,17 @@ class SnmpRaritanOutlet(SnmpRaritanPDU):
         # Open the Snmp AgentProxy connection
         self._snmp_proxy = get_snmp_proxy(ds0, config)
 
-        d=getTableStuff(self._snmp_proxy, [ measurementsOutletSensorValue,
-           ])
+        d = yield getTableStuff(self._snmp_proxy, [measurementsOutletSensorValue,
+                                                  ])
         log.debug('SnmpRaritanOutlet data:{}'.format(d))
-        return d
+        returnValue(d)
 
     def onSuccess(self, result, config):
         """
         Called only on success. After onResult, before onComplete.
         """
 
-        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+        log.debug('In success - result is %s and config is %s ' % (result, config))
 
         data = self.new_data()
 
@@ -296,7 +306,7 @@ class SnmpRaritanOutlet(SnmpRaritanPDU):
                     try:
                         data['values'][ds.component][sensorProp[1]] = sensor_value
                     except:
-                        pass
+                        log.error('SnmpRaritanOutlet onSuccess: Error while storing value')
         return data
                                                                                                                                                                                      
 
@@ -307,6 +317,7 @@ class SnmpRaritanOCP(SnmpRaritanPDU):
             'trip': [15, 'trip'],
             }
 
+    @inlineCallbacks
     def collect(self, config):
         """
         This method really is run by zenpython daemon. Check zenpython.log
@@ -318,17 +329,17 @@ class SnmpRaritanOCP(SnmpRaritanPDU):
         # Open the Snmp AgentProxy connection
         self._snmp_proxy = get_snmp_proxy(ds0, config)
 
-        d=getTableStuff(self._snmp_proxy, [ measurementsOverCurrentProtectorSensorValue,
-           ])
+        d = yield getTableStuff(self._snmp_proxy, [measurementsOverCurrentProtectorSensorValue,
+                                                  ])
         log.debug('SnmpRaritanOCP data:{}'.format(d))
-        return d
+        returnValue(d)
 
     def onSuccess(self, result, config):
         """
         Called only on success. After onResult, before onComplete.
         """
 
-        log.debug( 'In success - result is %s and config is %s ' % (result, config))
+        log.debug('In success - result is %s and config is %s ' % (result, config))
         
         data = self.new_data()
 
@@ -346,5 +357,5 @@ class SnmpRaritanOCP(SnmpRaritanPDU):
                     try:
                         data['values'][ds.component][sensorProp[1]] = sensor_value
                     except:
-                        pass
+                        log.error('SnmpRaritanOCP onSuccess: Error while storing value')
         return data
