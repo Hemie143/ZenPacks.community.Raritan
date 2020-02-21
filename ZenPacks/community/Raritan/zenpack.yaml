@@ -254,7 +254,6 @@ device_classes:
 
         graphs:
           Temperature:
-            height: 100
             width: 1000
             units: "\xB0C"
             graphpoints:
@@ -286,7 +285,6 @@ device_classes:
             minval: 9
         graphs:
           Humidity:
-            height: 100
             width: 1000
             units: '%'
             graphpoints:
@@ -307,7 +305,6 @@ device_classes:
                 rrdtype: GAUGE
         graphs:
           OnOff:
-            height: '100'
             width: '1000'
             miny: -1
             maxy: 11
@@ -386,14 +383,12 @@ device_classes:
 
         graphs:
           Active Energy:
-            height: 100
             width: 1000
             units: 'Wh'
             graphpoints:
               Active_Energy:
                 dpName: Inlet_active_energy
           Power:
-            height: 100
             width: 1000
             units: 'W'
             graphpoints:
@@ -402,35 +397,30 @@ device_classes:
               Apparent_Power:
                 dpName: Inlet_apparent_power
           Frequency:
-            height: 100
             width: 1000
             units: 'Hz'
             graphpoints:
               Frequency:
                 dpName: Inlet_frequency
           Power Factor:
-            height: 100
             width: 1000
             units: ''
             graphpoints:
               Power_Factor:
                 dpName: Inlet_power_factor
           Current:
-            height: 100
             width: 1000
             units: 'A'
             graphpoints:
               RMS_Current:
                 dpName: Inlet_rms_current
           Voltage:
-            height: 100
             width: 1000
             units: 'V'
             graphpoints:
               RMS_Voltage:
                 dpName: Inlet_rms_voltage
           Unbalanced Current:
-            height: 100
             width: 1000
             units: '%'
             graphpoints:
@@ -495,14 +485,12 @@ device_classes:
             maxval: '51'
         graphs:
           Active Energy:
-            height: 100
             width: 1000
             units: 'Wh'
             graphpoints:
               Active_Energy:
                 dpName: Outlet_active_energy
           Power:
-            height: 100
             width: 1000
             units: 'W'
             graphpoints:
@@ -511,28 +499,24 @@ device_classes:
               Apparent_Power:
                 dpName: Outlet_apparent_power
           Frequency:
-            height: 100
             width: 1000
             units: 'Hz'
             graphpoints:
               Frequency:
                 dpName: Outlet_frequency
           Power Factor:
-            height: 100
             width: 1000
             units: ''
             graphpoints:
               Power_Factor:
                 dpName: Outlet_power_factor
           Current:
-            height: 100
             width: 1000
             units: 'A'
             graphpoints:
               RMS_Current:
                 dpName: Outlet_rms_current
           Voltage:
-            height: 100
             width: 1000
             units: 'V'
             graphpoints:
@@ -553,7 +537,6 @@ device_classes:
               
         graphs:
            Current:
-            height: 100
             width: 1000
             units: 'A'
             graphpoints:

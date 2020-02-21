@@ -62,6 +62,7 @@ def getTableStuff(snmp_proxy, OIDstrings):
     d=snmp_proxy.getTable(OIDstrings)
     return d
 
+
 class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
     # List of device attributes you might need to do collection.
     proxy_attributes = (
@@ -143,7 +144,7 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
         for any log messages.
         """
 
-        log.debug('Starting SnmpRaritanTempSensor collect')
+        log.debug('Starting SnmpRaritanEnvSensor collect')
         log.debug('config:{}'.format(config))
         ds0 = config.datasources[0]
         # Open the Snmp AgentProxy connection
@@ -156,7 +157,7 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
                 measurementsExternalSensorState,
                 measurementsExternalSensorValue,
                 ])
-        log.debug('SnmpRaritanTempSensor data:{}'.format(d))
+        log.debug('SnmpRaritanEnvSensor data:{}'.format(d))
         returnValue(d)
 
     def onResult(self, result, config):
@@ -197,8 +198,11 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
         You can omit this method if you want the result of either the
         onSuccess or onError method to be used without further processing.
         """
-        log.debug('Starting SnmpRaritanTempSensor onComplete')
+        log.debug('Starting SnmpRaritanEnvSensor onComplete')
+        # TODO: troubleshoot the following, I'm not sure the SNMP session is always closed
+        log.debug('onComplete proxy1: {}'.format(self._snmp_proxy.__dict__))
         self._snmp_proxy.close()
+        log.debug('onComplete proxy2: {}'.format(self._snmp_proxy.__dict__))
         return result
 
 
@@ -281,7 +285,7 @@ class SnmpRaritanHumidSensor(SnmpRaritanEnvSensor):
 
         data['events'] = []
         data['maps'] = []
-        log.debug( 'data is %s ' % (data))
+        log.debug('data is %s ' % (data))
         return data
 
 
