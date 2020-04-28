@@ -278,6 +278,7 @@ device_classes:
             eventClass: /Environ
             minval: '9'
           OnCallSMS Low Humidity:
+            type: DurationThreshold
             dsnames: [HumidSensor_humidity]
             severity: 5
             minval: '30'
