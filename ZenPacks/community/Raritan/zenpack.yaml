@@ -68,7 +68,6 @@ classes:
       port:
         label: Port
 
-
   RaritanInlet:
     base: [zenpacklib.Component]
     label: Inlet
@@ -263,12 +262,11 @@ device_classes:
 
       RaritanHumiditySensor:
         targetPythonClass: ZenPacks.community.Raritan.RaritanHumiditySensor
-
         datasources:
           HumidSensor:
             type: Python
+            cycletime: ${here/zCommandCollectionInterval}
             plugin_classname: ZenPacks.community.Raritan.dsplugins.SnmpRaritanEnvSensor.SnmpRaritanHumidSensor
-
             datapoints:
               humidity:
                 rrdtype: GAUGE
@@ -280,18 +278,27 @@ device_classes:
           OnCallSMS Low Humidity:
             type: DurationThreshold
             dsnames: [HumidSensor_humidity]
+            eventClass: /HW/Humidity
             severity: 5
-            minval: '30'
+            minval: '15'
             timePeriod: 15 minutes
-            minval: 9
+            violationPercentage: 100
         graphs:
           Humidity:
             width: 1000
+            height: 400
             units: '%'
             graphpoints:
               humidity:
                 dpName: HumidSensor_humidity
-                includeThresholds: true
+                lineType: AREA
+              OnCallSMS Low Humidity:
+                type: ThresholdGraphPoint
+                threshId: OnCallSMS Low Humidity
+              Low Humidity:
+                type: ThresholdGraphPoint
+                sequence: 1
+                threshId: Low Humidity
 
       RaritanOnOffSensor:
         targetPythonClass: ZenPacks.community.Raritan.RaritanOnOffSensor
@@ -523,7 +530,8 @@ device_classes:
             graphpoints:
               RMS_Voltage:
                 dpName: Outlet_rms_voltage
-              
+
+
       RaritanOCP:
         targetPythonClass: ZenPacks.community.Raritan.RaritanOCP
 

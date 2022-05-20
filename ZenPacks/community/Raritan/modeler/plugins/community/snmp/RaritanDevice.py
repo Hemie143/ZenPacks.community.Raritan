@@ -5,8 +5,8 @@ from Products.DataCollector.plugins.CollectorPlugin import SnmpPlugin, GetTableM
 class RaritanDevice(SnmpPlugin):
 
     snmpGetMap = GetMap({
-        '.1.3.6.1.4.1.13742.8.1.1.1.1.0' : 'deviceName',
-        '.1.3.6.1.4.1.13742.8.1.1.1.14.0' : 'model',
+        '.1.3.6.1.4.1.13742.8.1.1.1.1.0': 'deviceName',
+        '.1.3.6.1.4.1.13742.8.1.1.1.14.0': 'model',
         })
 
     def process(self, device, results, log):

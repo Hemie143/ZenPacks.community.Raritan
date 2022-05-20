@@ -46,7 +46,6 @@ def get_snmp_proxy(ds0, config):
     snmp_proxy.open()
     return snmp_proxy
 
-
 def getScalarStuff(snmp_proxy, scalarOIDstrings):
     # scalarOIDstring must be a list
     # NB scalarOIDstrings MUST all come from the same SNMP table or you get no data returned
@@ -170,9 +169,9 @@ class SnmpRaritanEnvSensor(PythonDataSourcePlugin):
         log.debug( 'result is %s ' % (result))
 
         return result
- 
+
     def onSuccess(self, result, config):
-        return result
+        return NotImplementedError
 
     def onError(self, result, config):
         """
@@ -316,5 +315,3 @@ class SnmpRaritanOnOffSensor(SnmpRaritanEnvSensor):
         data['maps'] = []
         log.debug('OnOff data is %s ' % (data))
         return data
-
-

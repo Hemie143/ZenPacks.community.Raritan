@@ -166,7 +166,7 @@ class SnmpRaritanPDU(PythonDataSourcePlugin):
         return result
  
     def onSuccess(self, result, config):
-        return result
+        return NotImplementedError
             
     def onError(self, result, config):
         """
